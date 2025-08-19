@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+.env
+venv/
+instance/
+migrations/
+app.db
+*.sqlite3
+
+# Node.js
+node_modules/
+dist/
+.DS_Store
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+
+# IDE / Editor specific
+.vscode/
+.idea/
+*.swp

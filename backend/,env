@@ -1,0 +1,2 @@
+# 你可以把 config.py 中的 SECRET_KEY 放在这里
+SECRET_KEY='114514'
