@@ -14,3 +14,4 @@ from . import master_product_routes
 from . import product_routes
 from . import order_routes
 from . import stats_routes
+from . import auth_routes

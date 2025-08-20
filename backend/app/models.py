@@ -13,7 +13,7 @@ class Event(db.Model):
     
     products = db.relationship('Product', backref='event', lazy=True, cascade="all, delete-orphan")
     orders = db.relationship('Order', backref='event', lazy=True, cascade="all, delete-orphan")
-
+    vendor_password = db.Column(db.String(128), nullable=True) # nullable=True 表示可以为空
     def to_dict(self):
         return {
             'id': self.id,
