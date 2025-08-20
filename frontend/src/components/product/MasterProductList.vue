@@ -24,7 +24,7 @@
         <tr v-for="product in store.filteredProducts" :key="product.id">
           <td>
             <!-- 新增图片预览 -->
-            <img v-if="product.image_url" :src="backendUrl + product.image_url" :alt="product.name" class="preview-img">
+            <img v-if="product.image_url" :src="product.image_url" :alt="product.name" class="preview-img">
             <span v-else class="no-img">无图</span>
           </td>
           <td>{{ product.product_code }}</td>

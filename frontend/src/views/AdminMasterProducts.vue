@@ -137,7 +137,7 @@ function openEditModal(product) {
   editableProduct.value = { ...product }; // 创建副本以供编辑
   editFormFile.value = null;
   // 如果商品已有图片，显示现有图片；否则不显示
-  editPreviewUrl.value = product.image_url ? `${backendUrl}${product.image_url}` : '';
+  editPreviewUrl.value = product.image_url ? `${product.image_url}` : '';
   isEditModalVisible.value = true;
 }
 

@@ -10,7 +10,7 @@
       <div v-for="item in order.items" :key="item.id" class="order-item">
         <!-- 缩略图容器 -->
         <div class="item-thumbnail">
-          <img v-if="item.product_image_url" :src="backendUrl + item.product_image_url" :alt="item.product_name" />
+          <img v-if="item.product_image_url" :src="item.product_image_url" :alt="item.product_name" />
           <div v-else class="no-img-placeholder">?</div>
         </div>
         <!-- 商品信息 -->
