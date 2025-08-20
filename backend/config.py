@@ -7,6 +7,9 @@ class Config:
     # 设置一个密钥，用于保护 session 和其他安全相关的事务
     UPLOAD_FOLDER = os.path.join(basedir, 'uploads')
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'a-hard-to-guess-string'
+
+    ADMIN_PASSWORD=os.environ.get('ADMIN_PASSWORD')
+    VENDOR_PASSWORD=os.environ.get('VENDOR_PASSWORD')
     
     # 数据库配置
     # 设置 SQLAlchemy 数据库的 URI

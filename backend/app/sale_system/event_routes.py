@@ -33,7 +33,8 @@ def create_event():
         new_event = Event(
             name=data['name'],
             date=datetime.strptime(data['date'], '%Y-%m-%d').date(),
-            location=data.get('location', '')
+            location=data.get('location', ''),
+            vendor_password=data.get('vendor_password')
             # status 会自动使用模型中定义的默认值 '未进行'
         )
         db.session.add(new_event)
@@ -77,7 +78,9 @@ def update_event(event_id):
             event.date = datetime.strptime(data['date'], '%Y-%m-%d').date()
         if 'location' in data:
             event.location = data['location']
-        
+        if 'vendor_password' in data:
+            # 允许将密码设置为空字符串来清除它
+            event.vendor_password = data['vendor_password']
         db.session.commit()
         return jsonify(event.to_dict()), 200
     except (ValueError, TypeError):
