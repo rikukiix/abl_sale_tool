@@ -10,7 +10,7 @@
       <div v-for="item in order.items" :key="item.id" class="order-item">
         <!-- 缩略图容器 -->
         <div class="item-thumbnail">
-          <img v-if="item.product_image_url" :src="backendUrl + item.product_image_url" :alt="item.product_name" />
+          <img v-if="item.product_image_url" :src="item.product_image_url" :alt="item.product_name" />
           <div v-else class="no-img-placeholder">?</div>
         </div>
         <!-- 商品信息 -->
@@ -24,14 +24,11 @@
     </div>
 
     <div class="order-footer">
-      <span class="total-amount">总计: <strong>¥{{ order.total_amount.toFixed(2) }}</strong></span>
-      <div class="actions">
-        <button class="btn btn-cancel" @click="$emit('cancel', order.id)">
-          取消
-        </button>
-        <button class="btn btn-complete" @click="$emit('complete', order.id)">
-          完成
-        </button>
+      <span class="total-amount">总计: ¥{{ order.total_amount.toFixed(2) }}</span>
+      <!-- 【修改】只有在待处理状态下才显示按钮 -->
+      <div v-if="!isCompleted" class="button-group">
+        <button class="btn btn-cancel" @click="$emit('cancel', order.id)">取消</button>
+        <button class="btn btn-complete" @click="$emit('complete', order.id)">完成配货</button>
       </div>
     </div>
   </div>
@@ -41,9 +38,9 @@
 import { computed } from 'vue';
 
 const props = defineProps({
-  order: { type: Object, required: true }
+  order: { type: Object, required: true },
+  isCompleted: { type: Boolean, default: false }
 });
-
 defineEmits(['complete', 'cancel']);
 
 // 【新增】定义后端 URL 以便正确加载图片
@@ -59,6 +56,12 @@ const formattedTime = computed(() => {
 </script>
 
 <style scoped>
+.order-card.is-completed {
+  border-left-color: #555; /* 已完成的订单用灰色边框 */
+  opacity: 0.8;
+}
+.button-group { display: flex; gap: 0.5rem; }
+.btn-cancel { /* ... 危险操作的样式 ... */ }
 /* --- 整体卡片样式 (保持或微调) --- */
 .order-card {
   background-color: var(--card-bg-color);

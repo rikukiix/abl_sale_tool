@@ -15,6 +15,10 @@
         <label for="location">地点:</label>
         <input id="location" v-model="formData.location" type="text" placeholder="例如：上海" />
       </div>
+      <div class="form-group">
+        <label for="vendor_password">摊主密码 (可选):</label>
+        <input id="vendor_password" v-model="formData.vendor_password" type="text" placeholder="留空则使用全局密码" />
+      </div>
       
       <!-- 按钮在提交过程中会被禁用，防止重复点击 -->
       <button type="submit" class="btn" :disabled="isSubmitting">
@@ -41,6 +45,7 @@ const formData = ref({
   name: '',
   date: '',
   location: '',
+  vendor_password: '' 
 });
 
 // 处理表单提交的函数
@@ -52,7 +57,7 @@ async function handleSubmit() {
     await store.createEvent(formData.value);
     
     // 创建成功后，重置表单
-    formData.value = { name: '', date: '', location: '' };
+    formData.value = { name: '', date: '', location: '', vendor_password: '' };
     // 可以在这里给用户一个更友好的成功提示，而不是 alert
     // 例如：showSuccessToast('创建成功!');
     

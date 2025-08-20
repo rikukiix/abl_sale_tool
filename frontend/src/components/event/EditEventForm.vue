@@ -13,6 +13,10 @@
       <label for="edit-location">地点:</label>
       <input id="edit-location" v-model="editableEvent.location" type="text" />
     </div>
+    <div class="form-group">
+      <label for="edit-vendor_password">摊主密码 (可选):</label>
+      <input id="edit-vendor_password" v-model="editableEvent.vendor_password" type="text" placeholder="留空则清除密码" />
+    </div>
     <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     <!-- 提交按钮将由父组件（模态框）的 footer slot 提供 -->
   </form>
@@ -38,7 +42,7 @@ const editableEvent = ref({});
 watch(() => props.event, (newEvent) => {
   if (newEvent) {
     // 创建一个副本以避免直接修改 prop
-    editableEvent.value = { ...newEvent };
+    editableEvent.value = { ...newEvent,vendor_password: newEvent.vendor_password || '' };
   }
 }, { immediate: true }); // immediate: true 确保组件初始化时就执行一次
 

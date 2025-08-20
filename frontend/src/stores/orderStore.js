@@ -105,6 +105,9 @@ export const useOrderStore = defineStore('order', () => {
     setActiveEvent,
     markOrderAsCompleted,
     fetchCompletedOrders,
-    cancelOrder
+    cancelOrder,
+    pollPendingOrders,
+    startPolling,
+    stopPolling
   };
 });

@@ -8,7 +8,7 @@
       @click="handleCardClick(product)"
     >
       <div class="image-container">
-        <img v-if="product.image_url" :src="backendUrl + product.image_url" :alt="product.name" />
+        <img v-if="product.image_url" :src="product.image_url" :alt="product.name" />
         <div v-else class="no-img-placeholder">
           <span>{{ product.name.charAt(0) }}</span>
         </div>
