@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from . import sale_bp
 from .. import db
 from ..models import Product, Event, MasterProduct
-
+from werkzeug.utils import secure_filename
 # ... get_products_for_event 函数保持不变，但其内部 to_dict() 的行为已改变 ...
 @sale_bp.route('/api/events/<int:event_id>/products', methods=['GET'])
 def get_products_for_event(event_id):

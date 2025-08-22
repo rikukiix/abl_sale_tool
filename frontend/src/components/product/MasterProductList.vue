@@ -53,6 +53,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useProductStore } from '@/stores/productStore';
+import AppModal from '@/components/shared/AppModal.vue';
 const backendUrl = 'http://127.0.0.1:5000';
 const store = useProductStore();
 defineEmits(['edit', 'toggleStatus']);

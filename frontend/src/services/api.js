@@ -1,9 +1,9 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  // 这是一个相对路径。浏览器会自动在它前面加上当前的域名
-  // e.g., http://your_domain_or_ip/sale/api
-  baseURL: '/sale/api',
+  // baseURL 直接设置为相对路径的 /api 前缀
+  // 这会与 vite.config.js 中的代理规则完美匹配
+  baseURL: '/sale/api', 
 });
 
 export default apiClient;

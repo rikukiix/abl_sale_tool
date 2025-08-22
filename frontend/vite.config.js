@@ -18,6 +18,11 @@ export default defineConfig({
       '/sale/api': {
         target: 'http://127.0.0.1:5000',
         changeOrigin: true,
+      },
+      '/sale/static': {
+        target: 'http://127.0.0.1:5000', // 您的后端服务器地址
+        changeOrigin: true,
+        // 静态资源通常不需要重写路径
       }
     }
   }

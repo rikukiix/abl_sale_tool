@@ -37,6 +37,7 @@ export const useEventStore = defineStore('event', () => {
   // 【新增】Action: 更新展会状态
   async function updateEventStatus(eventId, newStatus) {
     try {
+      console.log('尝试更新展会状态', eventId, newStatus);
       // 调用后端的 PUT /api/events/<event_id>/status 接口
       const response = await api.put(`/events/${eventId}/status`, { status: newStatus });
       
@@ -55,14 +56,16 @@ export const useEventStore = defineStore('event', () => {
     }
   }
 
-  async function updateEvent(eventData) {
+  async function updateEvent(eventId, formData) {
     try {
-      const { id, ...dataToUpdate } = eventData;
-      // 调用我们刚在后端创建的 PUT /api/events/<id> 接口
-      const response = await api.put(`/events/${id}`, dataToUpdate);
+      // 使用 POST 方法发送 FormData，兼容性更好
+      // Axios 会自动为 FormData 设置正确的 Content-Type
+      // console.log('尝试更新展会信息', eventId, formData);
+      const response = await api.post(`/events/${eventId}`, formData);
       
       // 更新成功后，同样在前端直接更新数据
-      const index = events.value.findIndex(e => e.id === id);
+      // 注意：这里的 id 是 eventId，需要确保类型一致
+      const index = events.value.findIndex(e => e.id === Number(eventId));
       if (index !== -1) {
         // 使用 Object.assign 来合并更新后的字段
         Object.assign(events.value[index], response.data);
@@ -73,7 +76,6 @@ export const useEventStore = defineStore('event', () => {
       throw new Error(err.response?.data?.error || '更新展会信息失败。');
     }
   }
-
   return {
     events,
     isLoading,

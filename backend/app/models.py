@@ -13,14 +13,17 @@ class Event(db.Model):
     
     products = db.relationship('Product', backref='event', lazy=True, cascade="all, delete-orphan")
     orders = db.relationship('Order', backref='event', lazy=True, cascade="all, delete-orphan")
-    vendor_password = db.Column(db.String(128), nullable=True) # nullable=True 表示可以为空
+    vendor_password = db.Column(db.String(128), nullable=True) # nullable=True 表示可以为空 
+
+    qrcode_url=db.Column(db.String(256),nullable=True)
     def to_dict(self):
         return {
             'id': self.id,
             'name': self.name,
             'date': self.date.isoformat(),
             'location': self.location,
-            'status': self.status  # 直接从数据库字段读取 status
+            'status': self.status,  # 直接从数据库字段读取 status
+            'qrcode_url':self.qrcode_url
         }
 
 # 【新增】MasterProduct (主商品) 模型

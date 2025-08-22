@@ -2,7 +2,7 @@
   <div>
     <header class="page-header">
       <h1>全局商品库</h1>
-      <p>在这里管理所有可复用的商品模板。添加后，即可在展会中通过编号上架。</p>
+      <p>在这里管理所有可复用的商品模板。添加后,即可在展会中通过编号上架。</p>
     </header>
 
     <main>
@@ -23,24 +23,28 @@
               <label for="create-price">默认价格 (¥):</label>
               <input id="create-price" v-model.number="createFormData.default_price" type="number" step="0.01" placeholder="45.00" required />
             </div>
-            <div class="form-group form-group-file">
-              <label for="create-image">预览图:</label>
-              <input id="create-image" type="file" @change="handleCreateFileChange" accept="image/*" />
-              <img v-if="createPreviewUrl" :src="createPreviewUrl" alt="预览" class="preview-img-form" />
-            </div>
           </div>
+          
+          <!-- 【核心修改】使用可复用的 ImageUploader 组件 -->
+          <ImageUploader
+            label="预览图"
+            v-model="createFormFile"
+          />
+
           <button type="submit" class="btn" :disabled="isCreating">
             {{ isCreating ? '添加中...' : '添加到仓库' }}
           </button>
           <p v-if="createError" class="error-message">{{ createError }}</p>
         </form>
       </div>
+      
       <div class="filters">
         <label>
           <input type="checkbox" v-model="store.showInactive" @change="store.fetchMasterProducts()" />
           显示已停用的商品
         </label>
       </div>
+      
       <!-- 商品列表 -->
       <MasterProductList @edit="openEditModal" @toggleStatus="handleToggleStatus" />
     </main>
@@ -62,11 +66,15 @@
             <label>默认价格 (¥):</label>
             <input v-model.number="editableProduct.default_price" type="number" step="0.01" required />
           </div>
-          <div class="form-group">
-            <label>更换预览图:</label>
-            <input type="file" @change="handleEditFileChange" accept="image/*" />
-            <img v-if="editPreviewUrl" :src="editPreviewUrl" alt="预览" class="preview-img-form" />
-          </div>
+
+          <!-- 【核心修改】再次使用 ImageUploader 组件 -->
+          <ImageUploader
+            label="更换预览图"
+            :initial-image-url="editableProduct.image_url"
+            v-model="editFormFile"
+            @image-removed="handleEditImageRemoval"
+          />
+
           <p v-if="editError" class="error-message">{{ editError }}</p>
         </form>
       </template>
@@ -85,39 +93,39 @@ import { ref } from 'vue';
 import { useProductStore } from '@/stores/productStore';
 import MasterProductList from '@/components/product/MasterProductList.vue';
 import AppModal from '@/components/shared/AppModal.vue';
+// 【新增】导入可复用的图片上传组件
+import ImageUploader from '@/components/shared/ImageUploader.vue';
 
 const store = useProductStore();
-const backendUrl = 'http://127.0.0.1:5000'; // 用于正确显示已上传的图片
+// 【移除】不再需要硬编码的 backendUrl
 
 // --- 创建逻辑的状态 ---
 const isCreating = ref(false);
+
 const createError = ref('');
 const createFormData = ref({ product_code: '', name: '', default_price: null });
-const createFormFile = ref(null);
-const createPreviewUrl = ref('');
-
-function handleCreateFileChange(event) {
-  const file = event.target.files[0];
-  if (file) {
-    createFormFile.value = file;
-    createPreviewUrl.value = URL.createObjectURL(file);
-  } else {
-    createFormFile.value = null;
-    createPreviewUrl.value = '';
-  }
-}
+const createFormFile = ref(null); // ImageUploader 会通过 v-model 更新这个
+// 【移除】不再需要 createPreviewUrl 和 handleCreateFileChange
 
 async function handleCreate() {
   isCreating.value = true;
   createError.value = '';
   try {
-    await store.createMasterProduct(createFormData.value, createFormFile.value);
+    // 【修改】构建 FormData
+    const formData = new FormData();
+    formData.append('product_code', createFormData.value.product_code);
+    formData.append('name', createFormData.value.name);
+    formData.append('default_price', createFormData.value.default_price);
+    if (createFormFile.value) {
+      formData.append('image', createFormFile.value);
+    }
+    
+    // 假设 store action 已被修改为接收 FormData
+    await store.createMasterProduct(formData);
+    
     // 成功后重置表单
     createFormData.value = { product_code: '', name: '', default_price: null };
-    createFormFile.value = null;
-    createPreviewUrl.value = '';
-    // 如果<input type="file">不是组件，需要手动清空
-    document.getElementById('create-image').value = null;
+    createFormFile.value = null; // ImageUploader 会自动清空预览
   } catch (error) {
     createError.value = error.message;
   } finally {
@@ -129,15 +137,15 @@ async function handleCreate() {
 const isEditModalVisible = ref(false);
 const isUpdating = ref(false);
 const editError = ref('');
-const editableProduct = ref({}); // 用于编辑的副本
-const editFormFile = ref(null);
-const editPreviewUrl = ref('');
+const editableProduct = ref({});
+const editFormFile = ref(null); // ImageUploader 会通过 v-model 更新这个
+const isImageRemovedForEdit = ref(false); // 标记用户是否点击了移除
+// 【移除】不再需要 editPreviewUrl 和 handleEditFileChange
 
 function openEditModal(product) {
-  editableProduct.value = { ...product }; // 创建副本以供编辑
-  editFormFile.value = null;
-  // 如果商品已有图片，显示现有图片；否则不显示
-  editPreviewUrl.value = product.image_url ? `${product.image_url}` : '';
+  editableProduct.value = { ...product };
+  editFormFile.value = null; // 清空上次选择的文件
+  isImageRemovedForEdit.value = false; // 重置移除标记
   isEditModalVisible.value = true;
 }
 
@@ -146,19 +154,29 @@ function closeEditModal() {
   editError.value = '';
 }
 
-function handleEditFileChange(event) {
-  const file = event.target.files[0];
-  if (file) {
-    editFormFile.value = file;
-    editPreviewUrl.value = URL.createObjectURL(file);
-  }
+// 【新增】处理来自 ImageUploader 的移除事件
+function handleEditImageRemoval() {
+  isImageRemovedForEdit.value = true;
 }
 
 async function handleUpdate() {
   isUpdating.value = true;
   editError.value = '';
   try {
-    await store.updateMasterProduct(editableProduct.value, editFormFile.value);
+    // 【修改】构建 FormData
+    const formData = new FormData();
+    formData.append('product_code', editableProduct.value.product_code);
+    formData.append('name', editableProduct.value.name);
+    formData.append('default_price', editableProduct.value.default_price);
+
+    if (editFormFile.value) {
+      formData.append('image', editFormFile.value);
+    } else if (isImageRemovedForEdit.value) {
+      formData.append('remove_image', 'true');
+    }
+    
+    // 假设 store action 已被修改为接收 ID 和 FormData
+    await store.updateMasterProduct(editableProduct.value.id, formData);
     closeEditModal();
   } catch (error) {
     editError.value = error.message;
@@ -166,6 +184,7 @@ async function handleUpdate() {
     isUpdating.value = false;
   }
 }
+
 async function handleToggleStatus(product) {
   const actionText = product.is_active ? '停用' : '启用';
   if (window.confirm(`确定要"${actionText}"商品 "${product.name}" 吗？`)) {
@@ -179,7 +198,7 @@ async function handleToggleStatus(product) {
 </script>
 
 <style scoped>
-/* 页面和表单的通用样式 */
+/* ... 原有样式基本保持不变 ... */
 .page-header {
   margin-bottom: 2rem;
   padding-bottom: 1rem;
@@ -198,11 +217,10 @@ async function handleToggleStatus(product) {
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  gap: 1.5rem; /* 稍微增加间距 */
   margin-bottom: 1.5rem;
 }
 .form-group { display: flex; flex-direction: column; }
-.form-group-file { grid-column: 1 / -1; } /* 文件上传占满整行 */
 label { margin-bottom: 0.5rem; }
 input[type="text"], input[type="number"] {
   width: 100%;
@@ -214,15 +232,7 @@ input[type="text"], input[type="number"] {
   box-sizing: border-box;
 }
 .error-message { color: var(--error-color); margin-top: 1rem; }
-.preview-img-form {
-  width: 120px;
-  height: 120px;
-  object-fit: cover; /* 【核心】同样使用 cover */
-  margin-top: 1rem;
-  display: block;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-}
+
 .btn-primary {
   background-color: var(--accent-color);
   color: var(--bg-color);
@@ -231,13 +241,14 @@ button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-.edit-form { /* 模态框内的表单样式 */
+.edit-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem; /* 增加间距以容纳ImageUploader */
 }
 .filters {
   margin-top: 2rem;
   margin-bottom: 1rem;
 }
+/* 【移除】不再需要 .preview-img-form 样式 */
 </style>
