@@ -126,14 +126,21 @@
         }
 
         # 动态 API（后端）
-        location /api/ {
+        location /sale/api/ {
             proxy_pass http://127.0.0.1:5000/;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
         }
+
+        # 静态资源代理
+        location /sale/static/ {
+            proxy_pass http://127.0.0.1:5000/static/;
+        }
     }
     ```
     重启 nginx 服务即可。
+
+    **重要提示**：本项目的API路径使用 `/sale/api` 前缀，请确保Nginx配置中的路径与前端代码中的路径一致。如果需要在生产环境使用不同的API路径，请参考 `frontend/ENV_CONFIG.md` 文件进行配置。
 
 ## 🤝 如何贡献
 

@@ -31,21 +31,34 @@ def delete_file(file_url):
     except Exception as e:
         print(f"Error deleting file {file_url}: {e}")
 
-def process_and_save_image(file_stream):
-    """处理图片：压缩、转换为 WebP 并保存。返回新文件的 URL 路径。"""
+def process_and_save_image(file_stream, file_type='product'):
+    """处理图片：压缩、转换为 WebP 并保存到对应目录"""
     try:
         img = Image.open(file_stream).convert("RGB")
         timestamp = int(time.time() * 1000)
         output_filename = f"{timestamp}.webp"
-        save_path = os.path.join(current_app.config['UPLOAD_FOLDER'], output_filename)
-        # 【调试】打印出最终要保存到的绝对路径
-        print(f"DEBUG: Attempting to save image to: {save_path}")
+        
+        # 根据文件类型选择保存目录
+        if file_type == 'product':
+            save_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], 'products')
+        elif file_type == 'qrcode':
+            save_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], 'qrcodes')
+        elif file_type == 'event':
+            save_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], 'events')
+        else:
+            save_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], 'temp')
+        
         # 确保目录存在
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        os.makedirs(save_dir, exist_ok=True)
+        save_path = os.path.join(save_dir, output_filename)
+        
+        # 保存图片
         img.save(save_path, 'webp', quality=60)
         
-        # 【修正】返回与 Flask 静态文件服务匹配的正确 URL
-        return f"/uploads/{output_filename}"
+        # 返回相对路径
+        relative_path = os.path.relpath(save_path, current_app.config['STATIC_FOLDER'])
+        return f"/static/{relative_path}"
+        
     except Exception as e:
         print(f"Image processing error: {e}")
         return None

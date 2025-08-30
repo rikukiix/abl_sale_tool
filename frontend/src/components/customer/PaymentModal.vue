@@ -2,7 +2,18 @@
   <div v-if="show" class="payment-modal-backdrop">
     <div class="payment-modal-content">
       <h3>请扫码支付 <strong>¥{{ total.toFixed(2) }}</strong></h3>
-      <img src="/qr-code.png" alt="收款码" class="qr-code" />
+      
+      <!-- 动态显示收款码图片 -->
+      <div v-if="qrCodeUrl" class="qr-code-container">
+        <img :src="qrCodeUrl" alt="收款码" class="qr-code" />
+      </div>
+      
+      <!-- 如果没有收款码，显示提示信息 -->
+      <div v-else class="no-qr-code">
+        <p>暂无收款码</p>
+        <p>请联系摊主设置收款码</p>
+      </div>
+      
       <p>支付完成后，请等待摊主为您配货</p>
       <button class="btn" @click="$emit('close')">关闭</button>
     </div>
@@ -12,7 +23,8 @@
 <script setup>
 defineProps({
   show: { type: Boolean, required: true },
-  total: { type: Number, required: true }
+  total: { type: Number, required: true },
+  qrCodeUrl: { type: String, default: null } // 新增：收款码URL
 });
 defineEmits(['close']);
 </script>
@@ -59,11 +71,30 @@ defineEmits(['close']);
   font-size: 2rem;
 }
 
+.qr-code-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
 .qr-code {
   max-width: 300px;
   width: 100%;
   aspect-ratio: 1 / 1;
   border-radius: 8px;
+  object-fit: contain;
+}
+
+.no-qr-code {
+  padding: 2rem;
+  color: #888;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.no-qr-code p {
+  margin: 0.5rem 0;
 }
 
 .payment-modal-content p {

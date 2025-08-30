@@ -39,6 +39,12 @@ def get_events():
     events = query.order_by(Event.date.desc()).all()
     return jsonify([event.to_dict() for event in events]), 200
 
+@sale_bp.route('/api/events/<int:event_id>', methods=['GET'])
+def get_event(event_id):
+    """获取单个展会信息"""
+    event = Event.query.get_or_404(event_id)
+    return jsonify(event.to_dict()), 200
+
 @sale_bp.route('/api/events', methods=['POST'])
 def create_event():
     data = request.form

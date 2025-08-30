@@ -1,0 +1,28 @@
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    # 前端静态文件
+    location / {
+        root /path/to/your/vue/dist;
+        index index.html;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # 后端静态文件
+    location /static/ {
+        proxy_pass http://127.0.0.1:5000/static/;
+    }
+
+    # 上传文件
+    location /uploads/ {
+        proxy_pass http://127.0.0.1:5000/uploads/;
+    }
+
+    # API代理
+    location /sale/api/ {
+        proxy_pass http://127.0.0.1:5000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
