@@ -9,7 +9,8 @@ export const useCustomerStore = defineStore('customer', () => {
   const cart = ref([]);
   const isLoading = ref(false);
   const error = ref(null);
-  const activeEventId = ref(null); 
+  const activeEventId = ref(null);
+  const activeEvent = ref(null); // 新增：当前展会信息
 
   // --- Actions ---
   function setupStoreForEvent(eventId) {
@@ -18,9 +19,11 @@ export const useCustomerStore = defineStore('customer', () => {
       return;
     }
     activeEventId.value = parseInt(eventId, 10);
-    // 获取到 eventId 后立即加载商品
+    // 获取到 eventId 后立即加载商品和展会信息
     fetchProductsForEvent();
+    fetchEventInfo(); // 新增：获取展会信息
   }
+  
   function initializeEventFromUrl() {
     
     const urlParams = new URLSearchParams(window.location.search);
@@ -28,6 +31,7 @@ export const useCustomerStore = defineStore('customer', () => {
     if (eventIdFromUrl) {
       activeEventId.value = parseInt(eventIdFromUrl, 10);
       fetchProductsForEvent(); // 获取到 eventId 后再加载商品
+      fetchEventInfo(); // 新增：获取展会信息
     } else {
       error.value = "未指定展会ID，无法加载商品。请使用包含 ?event=ID 的链接访问。";
     }
@@ -46,6 +50,18 @@ export const useCustomerStore = defineStore('customer', () => {
       console.error(err);
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  // 新增：获取展会信息
+  async function fetchEventInfo() {
+    if (!activeEventId.value) return;
+    try {
+      const response = await api.get(`/events/${activeEventId.value}`);
+      activeEvent.value = response.data;
+    } catch (err) {
+      console.error('加载展会信息失败:', err);
+      // 不设置error，因为这不是关键功能
     }
   }
 
@@ -112,6 +128,11 @@ export const useCustomerStore = defineStore('customer', () => {
     return cart.value.reduce((total, item) => total + item.quantity, 0);
   });
 
+  // 新增：获取收款码URL的getter
+  const qrCodeUrl = computed(() => {
+    return activeEvent.value?.qrcode_url || null;
+  });
+
 
   return {
     products,
@@ -119,7 +140,10 @@ export const useCustomerStore = defineStore('customer', () => {
     isLoading,
     error,
     activeEventId,
+    activeEvent, // 新增：导出展会信息
+    qrCodeUrl, // 新增：导出收款码URL
     fetchProductsForEvent,
+    fetchEventInfo, // 新增：导出获取展会信息方法
     addToCart,
     removeFromCart,
     clearCart,

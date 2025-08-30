@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import api from '@/services/api';
 import { ref, computed } from 'vue';
+
 export const useProductStore = defineStore('masterProduct', () => {
   // --- State ---
   const masterProducts = ref([]);
@@ -9,27 +10,22 @@ export const useProductStore = defineStore('masterProduct', () => {
   const searchTerm = ref('');
   const showInactive = ref(false);
   
+  // --- Getters (Computed) ---
   const filteredProducts = computed(() => {
-    // 如果搜索词为空，直接返回原始列表
     if (!searchTerm.value.trim()) {
       return masterProducts.value;
     }
-    
-    // 将搜索词转为小写，以便进行不区分大小写的匹配
     const lowerCaseSearchTerm = searchTerm.value.toLowerCase();
-    
-    // 使用 Array.prototype.filter 方法
     return masterProducts.value.filter(product => {
-      // 检查商品名称是否包含搜索词
       const nameMatch = product.name.toLowerCase().includes(lowerCaseSearchTerm);
-      // 检查商品编号是否包含搜索词
       const codeMatch = product.product_code.toLowerCase().includes(lowerCaseSearchTerm);
-      
-      // 如果名称或编号任一匹配，则返回 true
       return nameMatch || codeMatch;
     });
   });
+
   // --- Actions ---
+  
+  // fetchMasterProducts 无需修改
   async function fetchMasterProducts() {
     isLoading.value = true;
     error.value = null;
@@ -44,49 +40,43 @@ export const useProductStore = defineStore('masterProduct', () => {
       isLoading.value = false;
     }
   }
-  async function createMasterProduct(productData, imageFile) {
-    const formData = new FormData();
-    // 将所有文本字段添加到 FormData
-    Object.keys(productData).forEach(key => {
-      formData.append(key, productData[key]);
-    });
-    // 如果有图片文件，也添加进去
-    if (imageFile) {
-      formData.append('image', imageFile);
-    }
-    
+
+  // 【已修改】createMasterProduct 现在直接接收一个 FormData 对象
+  async function createMasterProduct(formData) {
     try {
-      // 发送 FormData 时，Axios 会自动设置正确的 Content-Type
+      // 组件已经准备好了 FormData，我们直接发送即可
+      // Axios 会自动设置正确的 Content-Type
       const response = await api.post('/master-products', formData);
       masterProducts.value.unshift(response.data);
       return response.data;
-    } catch (err) { /* ... error handling ... */ }
+    } catch (err) {
+      console.error(err);
+      throw new Error(err.response?.data?.error || '创建商品失败，请检查输入。');
+    }
   }
 
-  async function updateMasterProduct(productData, imageFile) {
-    const formData = new FormData();
-    const { id, ...dataToUpdate } = productData;
-    Object.keys(dataToUpdate).forEach(key => {
-      formData.append(key, dataToUpdate[key]);
-    });
-    if (imageFile) {
-      formData.append('image', imageFile);
-    }
-
+  // 【已修改】updateMasterProduct 现在接收 productId 和 FormData 两个参数
+  async function updateMasterProduct(productId, formData) {
     try {
-      const response = await api.put(`/master-products/${id}`, formData);
-      const index = masterProducts.value.findIndex(p => p.id === id);
+      // 使用 POST 发送 FormData 来更新，以获得更好的兼容性
+      const response = await api.post(`/master-products/${productId}`, formData);
+      const index = masterProducts.value.findIndex(p => p.id === productId);
       if (index !== -1) {
+        // 使用新数据替换旧数据，以确保响应性
         masterProducts.value[index] = response.data;
       }
       return response.data;
-    } catch (err) { /* ... error handling ... */ }
+    } catch (err) {
+      console.error(err);
+      throw new Error(err.response?.data?.error || '更新商品失败，请重试。');
+    }
   }
+  
+  // toggleProductStatus 无需修改
   async function toggleProductStatus(product) {
     try {
       const newStatus = !product.is_active;
       const response = await api.put(`/master-products/${product.id}/status`, { is_active: newStatus });
-      // 更新本地数据
       const index = masterProducts.value.findIndex(p => p.id === product.id);
       if (index !== -1) {
         masterProducts.value[index] = response.data;
@@ -96,6 +86,8 @@ export const useProductStore = defineStore('masterProduct', () => {
       throw new Error(err.response?.data?.error || '更新商品状态失败。');
     }
   }
+
+  // --- Return ---
   return {
     masterProducts,
     isLoading,

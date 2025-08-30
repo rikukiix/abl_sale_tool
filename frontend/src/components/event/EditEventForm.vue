@@ -17,6 +17,12 @@
       <label for="edit-vendor_password">摊主密码 (可选):</label>
       <input id="edit-vendor_password" v-model="editableEvent.vendor_password" type="text" placeholder="留空则清除密码" />
     </div>
+    <ImageUploader
+      label="展会收款码"
+      :initial-image-url="editableEvent.payment_qr_code_url"
+      v-model="newQrCodeFile"
+      @image-removed="handleImageRemoval"
+    />
     <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     <!-- 提交按钮将由父组件（模态框）的 footer slot 提供 -->
   </form>
@@ -24,7 +30,7 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-
+import ImageUploader from '@/components/shared/ImageUploader.vue'; 
 const props = defineProps({
   event: {
     type: Object,
@@ -36,28 +42,53 @@ const errorMessage = ref('');
 // 创建一个可编辑的副本，避免直接修改 props
 const editableEvent = ref({});
 
+// 【简化】现在只需要这两个状态来构建 FormData
+const newQrCodeFile = ref(null); // v-model 会自动更新这个
+const imageRemoved = ref(false); // 专门的事件会更新这个
+
 // 使用 watch 监听 props.event 的变化
 // 当父组件传入新的 event 对象时（例如用户点击了另一个展会的编辑按钮），
 // 更新我们的可编辑副本
 watch(() => props.event, (newEvent) => {
   if (newEvent) {
-    // 创建一个副本以避免直接修改 prop
-    editableEvent.value = { ...newEvent,vendor_password: newEvent.vendor_password || '' };
+    editableEvent.value = { ...newEvent, vendor_password: newEvent.vendor_password || '' };
+    // 重置提交状态
+    newQrCodeFile.value = null;
+    imageRemoved.value = false;
   }
-}, { immediate: true }); // immediate: true 确保组件初始化时就执行一次
+}, { immediate: true });
+
+// 【新增】处理来自 ImageUploader 的移除事件
+function handleImageRemoval() {
+  imageRemoved.value = true;
+}
 
 // 定义一个暴露给父组件的方法，用于触发提交
 function submit() {
-  // 这里可以添加一些基础的验证
   if (!editableEvent.value.name || !editableEvent.value.date) {
     errorMessage.value = "展会名称和日期不能为空。";
-    return null; // 返回 null 表示验证失败
+    return null;
   }
   errorMessage.value = '';
-  return editableEvent.value;
+
+  const formData = new FormData();
+  
+  formData.append('id', editableEvent.value.id);
+  formData.append('name', editableEvent.value.name);
+  formData.append('date', editableEvent.value.date);
+  formData.append('location', editableEvent.value.location);
+  formData.append('vendor_password', editableEvent.value.vendor_password);
+
+  if (newQrCodeFile.value) {
+    formData.append('payment_qr_code', newQrCodeFile.value);
+  } 
+  else if (imageRemoved.value) {
+    formData.append('remove_payment_qr_code', 'true');
+  }
+
+  return formData;
 }
 
-// 使用 defineExpose 将 submit 方法暴露出去
 defineExpose({
   submit,
 });

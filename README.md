@@ -28,6 +28,12 @@
 
 - 🌙 自定义制品与展会：允许社团管理员自定义自己的展会和制品信息，给摊主设置权限与密码。
 
+
+![游客页面](./images/游客页面.png)
+![摊主页面](./images/摊主页面.png)
+![管理员页面](./images/管理员页面.png)
+
+
 **线下使用**：
 
 - 社团管理员添加展会和制品信息
@@ -85,7 +91,7 @@
 2.  **后端部署 (Flask)**
     ```bash
     # 创建虚拟环境并安装依赖
-    python -m venv venv
+    python3 -m venv venv
     source venv/bin/activate
     pip install -r requirements.txt
 
@@ -102,7 +108,6 @@
     # 安装依赖并构建生产环境静态文件
     npm install
     npm run build
-
     # 将构建好的 dist 目录内容部署到 nginx 服务的根目录下
     ```
 
@@ -121,24 +126,33 @@
         }
 
         # 动态 API（后端）
-        location /api/ {
+        location /sale/api/ {
             proxy_pass http://127.0.0.1:5000/;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
         }
+
+        # 静态资源代理
+        location /sale/static/ {
+            proxy_pass http://127.0.0.1:5000/static/;
+        }
     }
     ```
     重启 nginx 服务即可。
+
+    **重要提示**：本项目的API路径使用 `/sale/api` 前缀，请确保Nginx配置中的路径与前端代码中的路径一致。如果需要在生产环境使用不同的API路径，请参考 `frontend/ENV_CONFIG.md` 文件进行配置。
 
 ## 🤝 如何贡献
 
 我们欢迎一切形式的贡献！无论是提出建议、反馈Bug还是直接提交代码。
 
 1.  Fork 本仓库
-2.  创建特性分支 (`git checkout -b feat/AmazingFeature`)
-3.  提交你的更改 (`git commit -m 'Add some AmazingFeature'`)
-4.  推送到分支 (`git push origin feat/AmazingFeature`)
+2.  创建特性分支 (`git checkout -b feat/Feature`)
+3.  提交你的更改 (`git commit -m 'Add some Feature'`)
+4.  推送到分支 (`git push origin feat/Feature`)
 5.  开启一个 Pull Request
+6.  等待审核与合并
+7.  感谢您的贡献！
 
 ## 📜 开源协议
 
@@ -147,19 +161,9 @@
 ## 🔮 未来规划
 
 -   [ ] **移动端App开发**：开发原生App版本，提供更好的离线体验和推送通知。
--   [ ] **扫码枪支持**：集成硬件，进一步提升配货效率。
--   [ ] **多币种与汇率支持**：方便海外展会出摊。
--   [ ] **数据分析增强**：提供更深入的商品销售分析和利润报告。
-
-## 📞 联系与支持
-
-如果您在使用中遇到任何问题，或有好的想法建议，欢迎通过以下方式联系：
-
-*   [在 GitHub 上提交 Issue](<你的仓库地址>/issues)
-*   发送邮件至：`你的邮箱@example.com`
 
 ---
 
-**祝您出摊顺利，场场售罄！**
+**祝您出摊顺利，场场完售！**
 
 

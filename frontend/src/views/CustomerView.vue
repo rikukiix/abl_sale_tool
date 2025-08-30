@@ -24,6 +24,7 @@
     <PaymentModal 
       :show="showPaymentModal" 
       :total="orderTotal"
+      :qr-code-url="store.qrCodeUrl"
       @close="closePaymentModal"
     />
   </div>

@@ -7,6 +7,9 @@ instance/
 migrations/
 app.db
 *.sqlite3
+uploads/
+static/
+backend/uploads/
 
 # Node.js
 node_modules/

@@ -28,25 +28,25 @@
           <div class="status-actions">
             <button 
               v-if="event.status === '未进行'" 
-              @click="changeStatus(event.id, '进行中')" 
+              @click.stop="changeStatus(event.id, '进行中')" 
               class="action-btn"
             >
               ► 开始
             </button>
             <button 
               v-if="event.status === '进行中'" 
-              @click="changeStatus(event.id, '已结束')" 
+              @click.stop="changeStatus(event.id, '已结束')" 
               class="action-btn"
             >
               ■ 结束
             </button>
             <button v-if="event.status === '已结束'"
-              @click="changeStatus(event.id,'未进行')
+              @click.stop="changeStatus(event.id,'未进行')
               " class="action-btn">
               ► 重新开始
             </button>
             <!-- 已结束的展会没有操作 -->
-            <button @click="openEditModal(event)" class="action-btn edit-btn">
+            <button @click.stop="openEditModal(event)" class="action-btn edit-btn">
               编辑
             </button>
           </div>
@@ -129,11 +129,17 @@ function closeEditModal() {
 
 // 【新增】处理更新提交的函数
 async function handleUpdateEvent() {
-  if (editForm.value) {
-    const updatedData = editForm.value.submit();
-    if (updatedData) {
+  // 增加对 selectedEvent 的检查，更安全
+  if (editForm.value && selectedEvent.value) { 
+    const formData = editForm.value.submit();
+    if (formData) {
       try {
-        await store.updateEvent(updatedData);
+        // 【核心修正】
+        // 第一个参数传入 event ID
+        // 第二个参数传入 FormData
+        console.log('尝试进行更新')
+        await store.updateEvent(selectedEvent.value.id, formData);
+        console.log('更新成功');
         closeEditModal(); // 成功后关闭模态框
       } catch (error) {
         alert(error.message); // 显示错误
