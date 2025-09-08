@@ -11,6 +11,7 @@ import CustomerView from '../views/CustomerView.vue'
 import EventPortalView from '../views/EventPortalView.vue'
 import AdminEventOrders from '../views/AdminEventOrders.vue'
 import LoginView from '../views/LoginView.vue'
+import AdminEventStat from '../views/AdminEventStat.vue';
 const routes = [
     // --- 路由组 1: 管理后台 ---
     // 所有 /admin 开头的路径都会使用 AdminLayout 布局
@@ -42,6 +43,12 @@ const routes = [
           name: 'admin-event-orders',
           component: AdminEventOrders,
           props: true
+        },
+        // 【新增】销售统计路由
+        {
+        path: '/admin/events/:id/stats',
+        name: 'AdminEventStats',
+        component: AdminEventStat,
         }
       ],
     },
