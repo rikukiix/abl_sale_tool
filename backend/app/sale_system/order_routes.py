@@ -62,6 +62,7 @@ def create_order(event_id):
             requested_quantity = item.get('quantity')
             
             if not product_id or not requested_quantity or requested_quantity <= 0:
+                
                 return jsonify(error="Invalid item data in request."), 400
 
             product = Product.query.get(product_id)
@@ -82,10 +83,11 @@ def create_order(event_id):
             
             # 检查库存是否充足
             if available_stock < requested_quantity:
+                
                 return jsonify(
-                    error=f"Product '{product.name}' is out of stock.",
+                    error=f"'{product.name}'现在库存不足.",
                     detail=f"Requested: {requested_quantity}, Available: {available_stock}"
-                ), 400 # 使用 400 Bad Request 表示客户端请求错误
+                ), 406 # 使用 406 Not Acceptable 表示库存不足
 
         # --- 库存检查全部通过，现在可以安全地创建订单 ---
         
@@ -108,7 +110,7 @@ def create_order(event_id):
                 order_id=new_order.id, 
                 product_id=item.get('product_id'), 
                 quantity=item.get('quantity'),
-                price=product_prices[item.get('product_id')] # 记录下单时的单价
+                product=Product.query.get(item.get('product_id'))
             )
             db.session.add(order_item)
         
@@ -289,17 +291,11 @@ def download_sales_summary_excel(event_id):
             for cell in row:
                 cell.border = thin_border # 直接应用边框
 
-        # --- 自动调整列宽部分保持不变 ---
+        # --- 设置固定列宽 ---
+        fixed_width = 16  # 你可以根据需要调整这个常数
         for col in ws.columns:
-            max_length = 0
             column = get_column_letter(col[0].column)
-            for cell in col:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except: pass
-            adjusted_width = (max_length + 2) * 1.2
-            ws.column_dimensions[column].width = adjusted_width
+            ws.column_dimensions[column].width = fixed_width
 
     # --- 准备并发送文件部分保持不变 ---
     output_buffer.seek(0)
