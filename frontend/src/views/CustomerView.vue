@@ -31,6 +31,11 @@
 </template>
 
 <script setup>
+import { useAlert } from '@/services/useAlert';
+
+// 获取弹窗函数
+
+
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useCustomerStore } from '@/stores/customerStore';
 import { socket } from '@/services/socketService';
@@ -52,6 +57,7 @@ const orderTotal = ref(0);
 const isCheckingOut = ref(false); 
 
 async function handleCheckout() {
+  const { showAlert, showSuccess, showError } = useAlert();
   if (isCheckingOut.value) return; // 防止重复提交
 
   isCheckingOut.value = true;
@@ -60,10 +66,13 @@ async function handleCheckout() {
     if (newOrder) {
       orderTotal.value = store.cartTotal;
       showPaymentModal.value = true;
+      showSuccess('订单已成功提交！');
       store.clearCart();
     }
   } catch (error) {
-    alert(error.message);
+    console.log(error)
+    
+    showError(error.message);;
   } finally {
     isCheckingOut.value = false; // 无论成功失败，都解除禁用
   }
