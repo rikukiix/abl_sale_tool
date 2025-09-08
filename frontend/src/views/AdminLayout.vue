@@ -19,6 +19,9 @@
             <RouterLink :to="`/admin/events/${event.id}/orders`">
               订单管理
             </RouterLink>
+            <RouterLink :to="`/admin/events/${event.id}/stats`">
+              销售统计
+            </RouterLink>
           </nav>
         </div>
       </div>
