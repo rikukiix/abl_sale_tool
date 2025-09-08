@@ -2,6 +2,10 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import api from '@/services/api';
 import { socket } from '@/services/socketService';
+import { useAlert } from '@/services/useAlert';
+
+// 获取弹窗函数
+
 
 export const useCustomerStore = defineStore('customer', () => {
   // --- State ---
@@ -73,7 +77,8 @@ export const useCustomerStore = defineStore('customer', () => {
       if (existingItem.quantity < product.current_stock) {
         existingItem.quantity++;
       } else {
-        alert(`抱歉，"${product.name}" 库存不足！`);
+        const { showAlert, showSuccess, showError } = useAlert();
+        showError(`抱歉，"${product.name}" 库存不足！`);
       }
     } else {
       if (product.current_stock > 0) {
@@ -114,7 +119,12 @@ export const useCustomerStore = defineStore('customer', () => {
       return response.data;
     } catch (err) {
       console.error("Order submission failed:", err);
+      
+      
+      
       throw new Error(err.response?.data?.error || '下单失败，请重试。');
+
+
     }
   }
 
