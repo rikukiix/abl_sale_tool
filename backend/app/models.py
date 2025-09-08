@@ -77,6 +77,9 @@ class Product(db.Model):
     def current_stock(self):
         """当前库存 = 初始库存 - 已售出数量"""
         return self.initial_stock - self.sold_count
+    @property
+    def name(self):
+        return self.master_product.name if self.master_product else "未知商品"
 
     def to_dict(self):
         # 通过关系，将主商品的信息和本次展会的信息组合在一起返回
