@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // 根据环境配置API基础路径
-const getApiBaseUrl = () => {
+export const getApiBaseUrl = () => {
   // 开发环境：使用相对路径，通过Vite代理转发
   if (import.meta.env.DEV) {
     return '/sale/api';
