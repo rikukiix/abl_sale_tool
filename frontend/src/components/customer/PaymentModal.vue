@@ -35,8 +35,8 @@ defineEmits(['close']);
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 80vw;
+  height: 80vh;
   background-color: rgba(0, 0, 0, 0.85); /* 更深的背景，突出内容 */
   display: flex;
   justify-content: center;
@@ -47,16 +47,16 @@ defineEmits(['close']);
 /* 2. 内容容器 */
 .payment-modal-content {
   background-color: var(--card-bg-color);
-  padding: 2rem 3rem;
+  padding: 1rem 1rem;
   border-radius: 8px;
   border: 1px solid var(--border-color);
   text-align: center;
-  max-width: 450px; /* 限制最大宽度 */
+  max-width: 800px; /* 限制最大宽度 */
   width: 90%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem; /* 内部元素的间距 */
+  gap: 1rem; /* 内部元素的间距 */
 }
 
 /* 3. 标题和二维码样式 */
@@ -68,18 +68,18 @@ defineEmits(['close']);
 
 .payment-modal-content h3 strong {
   color: var(--accent-color);
-  font-size: 2rem;
+  font-size: 1rem;
 }
 
 .qr-code-container {
-  width: 100%;
+  width: 80%;
   display: flex;
   justify-content: center;
 }
 
 .qr-code {
-  max-width: 300px;
-  width: 100%;
+  max-width: 600px;
+  width: 80%;
   aspect-ratio: 1 / 1;
   border-radius: 8px;
   object-fit: contain;

@@ -103,7 +103,8 @@ def create_master_product():
             product_code=data['product_code'],
             name=data['name'],
             default_price=float(data['default_price']),
-            image_url=image_url
+            image_url=image_url,
+            category=data.get('category', None) # 【新增】分类字段
         )
         db.session.add(new_mp)
         db.session.commit()
@@ -127,10 +128,12 @@ def update_master_product(mp_id):
         # 1. 更新文本字段
         mp.product_code = data.get('product_code', mp.product_code)
         mp.name = data.get('name', mp.name)
+        mp.category = data.get('category', mp.category)
 
         print("DEBUG: Received data for update:", data)
         if 'default_price' in data:
             mp.default_price = float(data['default_price'])
+
 
         # 2. 处理图片移除逻辑
         if data.get('remove_image') == 'true':

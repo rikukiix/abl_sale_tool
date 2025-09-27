@@ -2,26 +2,32 @@
   <div class="list-container">
     <h2>商品列表</h2>
     <div class="search-box">
-        <input 
-          type="text" 
-          v-model="store.searchTerm" 
-          placeholder="搜索名称或编号..."
-        />
+      <input 
+        type="text" 
+        v-model="store.searchTerm" 
+        placeholder="搜索名称或编号..."
+      />
+      <!-- 新增分类筛选 -->
+      <select v-model="selectedCategory" @change="filterByCategory" class="category-select">
+        <option value="">全部分类</option>
+        <option v-for="cat in categoryOptions" :key="cat" :value="cat">{{ cat }}</option>
+      </select>
     </div>
     <div v-if="store.isLoading">加载中...</div>
     <div v-else-if="store.error" class="error-message">{{ store.error }}</div>
-    <table v-else-if="store.filteredProducts.length" class="product-table">
+    <table v-else-if="filteredProducts.length" class="product-table">
       <thead>
         <tr>
           <th>图像</th>
           <th>编号</th>
           <th>名称</th>
           <th>默认价格</th>
+          <th>商品分类</th>
           <th>操作</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="product in store.filteredProducts" :key="product.id">
+        <tr v-for="product in filteredProducts" :key="product.id">
           <td>
             <!-- 新增图片预览 -->
             <img v-if="product.image_url" :src="product.image_url" :alt="product.name" class="preview-img">
@@ -30,6 +36,7 @@
           <td>{{ product.product_code }}</td>
           <td>{{ product.name }}</td>
           <td>¥{{ product.default_price.toFixed(2) }}</td>
+          <td>{{ product.category || '未分类' }}</td>
           <td>
                 <button class="action-btn" @click="$emit('edit', product)">编辑</button>
                 <button 
@@ -51,17 +58,36 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useProductStore } from '@/stores/productStore';
 import AppModal from '@/components/shared/AppModal.vue';
 const backendUrl = 'http://127.0.0.1:5000';
 const store = useProductStore();
 defineEmits(['edit', 'toggleStatus']);
 
-onMounted(() => {
-  // 组件加载时重置搜索词，并获取数据
+const selectedCategory = ref('');
+const categoryOptions = computed(() => {
+  // 防止 products 未定义时报错
+  const cats = (store.masterProducts || [])
+    .map(p => p.category)
+    .filter(cat => !!cat && cat.trim() !== '');
+  return [...new Set(cats)];
+});
+const filteredProducts = computed(() => {
+  let list = store.filteredProducts;
+  if (selectedCategory.value) {
+    list = list.filter(p => p.category === selectedCategory.value);
+  }
+  return list;
+});
+function filterByCategory() {
+  // 这里只是触发响应式
+}
+
+onMounted(async() => {
   store.searchTerm = '';
-  store.fetchMasterProducts();
+  await store.fetchMasterProducts();
+  console.log(store.masterProducts); // 这里才是商品数据
 });
 </script>
 
@@ -199,5 +225,14 @@ onMounted(() => {
 .btn-success:hover {
   background-color: var(--success-color);
   color: white;
+}
+.category-select {
+  margin-left: 1rem;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg-color);
+  color: var(--primary-text-color);
+  min-width: 120px;
 }
 </style>
