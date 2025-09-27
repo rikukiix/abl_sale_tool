@@ -3,7 +3,9 @@
 一个为东方Project同人展摊主打造的、极简高效的销售与库存管理解决方案。
 
 **注意**:现在这个出摊工具的使用教程已经被迁移到了我们社团的**出摊指南.pdf**文档内,请在它的项目内查看之。
+
 **项目链接**:[Github](https://github.com/Renko6626/tho-booth-manual)
+
 **社团页面**:[境界景观学会])(https://www.abl.secret-sealing.club/events/booth-manual)
 
 
