@@ -1,5 +1,5 @@
 <template>
-  <div class="product-grid">
+  <div class="product-grid" :class="`card-size-${props.cardSize}`">
     <div 
       v-for="product in products" 
       :key="product.id"
@@ -26,7 +26,8 @@
 
 <script setup>
 const props = defineProps({
-  products: { type: Array, required: true }
+  products: { type: Array, required: true },
+  cardSize: { type: String, default: 'medium' }
 });
 const emit = defineEmits(['addToCart']);
 const backendUrl = 'http://127.0.0.1:5000';
@@ -46,8 +47,8 @@ function handleCardClick(product) {
     - 响应式布局：自动填充，每列最小 140px，最大 1fr (弹性填充)
     - 这将确保在不同尺寸的平板上都能良好显示
   */
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 1.5rem; /* 网格间距 */
+  
+  gap: 0.8rem; /* 网格间距 */
 }
 
 /* --- 商品卡片 --- */
@@ -55,12 +56,29 @@ function handleCardClick(product) {
   background-color: var(--card-bg-color);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  overflow: hidden; /* 防止图片溢出圆角 */
+  overflow: hidden;
   cursor: pointer;
-  position: relative; /* 为完售遮罩定位 */
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   display: flex;
   flex-direction: column;
+}
+
+.image-container {
+  width: 100%;
+  background-color: var(--bg-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  overflow: hidden;
+}
+
+.image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 等比例缩放并裁剪填满容器 */
+  object-position: center;
 }
 
 .product-card:hover {
@@ -69,13 +87,7 @@ function handleCardClick(product) {
   border-color: var(--accent-color);
 }
 
-/* --- 图片容器 --- */
-.image-container {
-  width: 100%;
-  /* 关键：使用 aspect-ratio 确保图片容器总是正方形 */
-  aspect-ratio: 1 / 1; 
-  background-color: var(--bg-color);
-}
+
 
 .image-container img {
   width: 100%;
@@ -93,7 +105,6 @@ function handleCardClick(product) {
   color: var(--accent-color);
   opacity: 0.5;
 }
-
 /* --- 商品信息 --- */
 .product-info {
   padding: 0.75rem;
@@ -105,10 +116,9 @@ function handleCardClick(product) {
 .product-name {
   font-weight: 600;
   color: var(--primary-text-color);
-  /* 防止长名称换行破坏布局 */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: nowrap;         /* 不换行 */
+  overflow: hidden;            /* 超出隐藏 */
+  text-overflow: ellipsis;     /* 超出显示省略号 */
   flex-grow: 1;
 }
 
@@ -143,5 +153,55 @@ function handleCardClick(product) {
   font-size: 1.5rem;
   font-weight: bold;
   backdrop-filter: blur(2px);
+}
+.product-grid.card-size-small .product-card {
+  width: 120px;
+  height: 180px;
+}
+.product-grid.card-size-medium .product-card {
+  width: 180px;
+  height: 260px;
+}
+.product-grid.card-size-large .product-card {
+  width: 240px;
+  height: 340px;
+}
+.product-grid.card-size-small .image-container {
+  height: 126px;
+}
+.product-grid.card-size-medium .image-container {
+  height: 182px;
+}
+.product-grid.card-size-large .image-container {
+  height: 272px;
+}
+.product-grid.card-size-small {
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+}
+.product-grid.card-size-medium {
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+}
+.product-grid.card-size-large {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.product-grid.card-size-small .product-name {
+  font-size: 0.65rem;
+}
+.product-grid.card-size-medium .product-name {
+  font-size: 0.8rem;
+}
+.product-grid.card-size-large .product-name {
+  font-size: 1rem;
+}
+
+.product-grid.card-size-small .product-price {
+  font-size: 0.75rem;
+}
+.product-grid.card-size-medium .product-price {
+  font-size: 1.05rem;
+}
+.product-grid.card-size-large .product-price {
+  font-size: 1.25rem;
 }
 </style>

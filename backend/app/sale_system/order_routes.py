@@ -195,17 +195,16 @@ def download_sales_summary_excel(event_id):
     """
     sales_data = _get_sales_summary_data(event_id)
 
-
-    
     if sales_data is None: return "Event not found.", 404
-    
-    # --- 数据准备部分保持不变 ---
+
+    # --- 数据准备部分 ---
     df = pd.DataFrame(sales_data['summary'])
     if df.empty:
-        df['ending_stock'] = pd.Series(dtype='int')
+        df['ending_stock'] = pd.Series(dtype='object')
     else:
-        df['ending_stock'] = df['initial_stock'] - df['total_quantity']
-    
+        # 让 ending_stock 列什么也不填（全为空）
+        df['ending_stock'] = None
+
     column_map = {
         'product_code': '制品编号', 'product_name': '制品名', 'initial_stock': '初始数量',
         'ending_stock': '结束数量', 'unit_price': '单价', 'total_quantity': '销量',
@@ -229,15 +228,14 @@ def download_sales_summary_excel(event_id):
         df.to_excel(writer, sheet_name='出摊记录', index=False, header=False, startrow=2)
         ws = writer.sheets['出摊记录']
 
-        # --- 写入和设置标题、表头，格式化数据区域部分保持不变 ---
-         # --- 写入和设置标题 ---
-        ws.merge_cells('A1:H1')
+        # --- 写入和设置标题 ---
+        ws.merge_cells('A1:F1')
         title_cell = ws['A1']
         title_cell.value = f"境界景观学会出摊标准记录 {pd.Timestamp.now().strftime('%Y年%m月')}版"
         title_cell.font = title_font
         title_cell.alignment = center_align
-        ws['I1'].value = "摊位号"
-        ws['I1'].font = body_font
+        ws['G1'].value = "摊位号"
+        ws['G1'].font = body_font
         ws.row_dimensions[1].height = 60
 
         # --- 写入和设置表头 ---
@@ -252,11 +250,12 @@ def download_sales_summary_excel(event_id):
         for row_idx in range(3, ws.max_row + 1):
             ws.row_dimensions[row_idx].height = 30
             if (row_idx % 2) == 0:
-                 for cell in ws[row_idx]:
+                for cell in ws[row_idx]:
                     cell.fill = light_blue_fill
             for cell in ws[row_idx]:
                 cell.border = thin_border
                 cell.font = body_font
+                cell.alignment = center_align
             ws[f'E{row_idx}'].number_format = '¥#,##0.00'
             ws[f'G{row_idx}'].number_format = '¥#,##0.00'
 
@@ -264,35 +263,34 @@ def download_sales_summary_excel(event_id):
         bottom_start_row = ws.max_row + 2
         bottom_labels = {
             f'A{bottom_start_row}': "出席人\n与其联系方式", f'A{bottom_start_row+2}': "特殊情况\n备注",
-            f'A{bottom_start_row+4}': "快递信息", f'C{bottom_start_row}': "日期",
-            f'C{bottom_start_row+1}': "活动名", f'E{bottom_start_row+1}': "总销售额"
+            f'A{bottom_start_row+3}': "快递信息", f'C{bottom_start_row}': "日期",
+            f'A{bottom_start_row+1}': "活动名", f'E{bottom_start_row+1}': "总销售额"
         }
         for cell_ref, label in bottom_labels.items():
             cell = ws[cell_ref]
             cell.value = label
             cell.font = body_font
             cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-        ws[f'D{bottom_start_row+1}'].value = sales_data['event_name']
+        ws[f'B{bottom_start_row+1}'].value = sales_data['event_name']
+        ws.merge_cells(f'B{bottom_start_row+3}:G{bottom_start_row+3}')
+        ws.merge_cells(f'B{bottom_start_row+2}:G{bottom_start_row+2}')
+        ws.merge_cells(f'B{bottom_start_row+1}:D{bottom_start_row+1}')
+        ws.row_dimensions[bottom_start_row+2].height = 30
+        ws.row_dimensions[bottom_start_row+3].height = 30
+        ws.row_dimensions[bottom_start_row+1].height = 30
         total_rev_cell = ws[f'F{bottom_start_row+1}']
         total_rev_cell.value = sales_data['total_revenue']
         total_rev_cell.number_format = '¥#,##0.00'
-        total_rev_cell.font = Font(name='微软雅黑', size=11, bold=True)
-        """
-        ws.merge_cells(f'A{bottom_start_row}:B{bottom_start_row+1}')
-        ws.merge_cells(f'A{bottom_start_row+2}:H{bottom_start_row+3}')
-        ws.merge_cells(f'A{bottom_start_row+4}:H{bottom_start_row+5}')
-        ws.merge_cells(f'D{bottom_start_row+1}:E{bottom_start_row+1}')
-        ws.merge_cells(f'F{bottom_start_row+1}:H{bottom_start_row+1}')
-        """
+        total_rev_cell.font = Font(name='微软雅黑', size=12, bold=True)
+
         # 【核心修正】为底部区域绘制边框的逻辑
-        # 移除错误的 if 判断，直接为区域内的所有单元格应用边框
-        bottom_area = f'A{bottom_start_row}:H{bottom_start_row+5}'
+        bottom_area = f'A{bottom_start_row}:G{bottom_start_row+3}'
         for row in ws[bottom_area]:
             for cell in row:
-                cell.border = thin_border # 直接应用边框
+                cell.border = thin_border
 
         # --- 设置固定列宽 ---
-        fixed_width = 16  # 你可以根据需要调整这个常数
+        fixed_width = 16
         for col in ws.columns:
             column = get_column_letter(col[0].column)
             ws.column_dimensions[column].width = fixed_width
@@ -300,7 +298,7 @@ def download_sales_summary_excel(event_id):
     # --- 准备并发送文件部分保持不变 ---
     output_buffer.seek(0)
     filename = f"{sales_data['event_name']}_出摊记录_{pd.Timestamp.now().strftime('%Y%m%d')}.xlsx"
-    
+
     return send_file(
         output_buffer,
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

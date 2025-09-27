@@ -139,16 +139,17 @@ async function handleSubmit() {
 .form-container {
   background-color: var(--card-bg-color);
   border: 1px solid var(--border-color);
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
+  padding: 1rem;           /* 缩小内边距 */
+  border-radius: 6px;      /* 稍微缩小圆角 */
+  margin-bottom: 1rem;     /* 缩小底部间距 */
+  font-size: 0.96rem;      /* 字体略小 */
 }
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 0.6rem;   /* 缩小组间距 */
 }
 label {
-  display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;   /* 缩小label间距 */
+  font-size: 0.95em;
 }
 input[type="text"],
 input[type="date"] {
@@ -156,13 +157,39 @@ input[type="date"] {
   background-color: var(--bg-color);
   border: 1px solid var(--border-color);
   color: var(--primary-text-color);
-  padding: 10px;
-  border-radius: 4px;
-  box-sizing: border-box; /* 确保 padding 不会撑大宽度 */
+  padding: 6px 8px;        /* 缩小输入框内边距 */
+  border-radius: 3px;
+  font-size: 0.96em;
+  height: 32px;            /* 限制高度更紧凑 */
+  box-sizing: border-box;
+}
+button,
+.btn,
+.btn-secondary {
+  padding: 6px 14px;       /* 缩小按钮 */
+  font-size: 0.96em;
+  border-radius: 3px;
+}
+.image-preview-container {
+  margin-top: 0.5rem;      /* 缩小预览间距 */
+  padding: 3px;
+  border-radius: 3px;
+}
+.image-preview {
+  max-width: 120px;        /* 缩小图片预览 */
+  max-height: 120px;
+}
+.remove-image-btn {
+  width: 20px;
+  height: 20px;
+  font-size: 13px;
+  line-height: 18px;
+  top: -8px;
+  right: -8px;
 }
 .error-message {
-  color: var(--error-color);
-  margin-top: 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.95em;
 }
 button:disabled {
   opacity: 0.5;
