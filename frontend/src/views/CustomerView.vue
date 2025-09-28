@@ -35,7 +35,7 @@
         @add-to-cart="store.addToCart"
       />
     </div>
-    <div class="cart-panel">
+    <div class="cart-panel" v-if="!isMobile">
       <ShoppingCart 
         :cart="store.cart"
         :total="store.cartTotal"
@@ -45,7 +45,16 @@
         @checkout="handleCheckout"
       />
     </div>
-
+    <!-- 手机端底部悬浮购物车 -->
+    <ShoppingCart 
+      v-if="isMobile"
+      :cart="store.cart"
+      :total="store.cartTotal"
+      :is-checking-out="isCheckingOut"
+      @add-to-cart="store.addToCart"
+      @remove-from-cart="store.removeFromCart"
+      @checkout="handleCheckout"
+    />
     <PaymentModal 
       :show="showPaymentModal" 
       :total="orderTotal"
@@ -125,6 +134,24 @@ onMounted(() => {
   store.setupStoreForEvent(props.id);;
 });
 
+
+function checkMobileCardSize() {
+  if (window.innerWidth <= 600) {
+    cardSize.value = 'small';
+  }
+}
+const isMobile = ref(window.innerWidth <= 600);
+function checkMobile() {
+  isMobile.value = window.innerWidth <= 600;
+}
+onMounted(() => {
+  checkMobile();
+  checkMobileCardSize();
+  window.addEventListener('resize', checkMobileCardSize);
+});
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobileCardSize);
+});
 </script>
 
 <style scoped>
@@ -230,5 +257,67 @@ onMounted(() => {
   background: var(--card-bg-color);
   border-color: var(--accent-color);
   color: var(--accent-color);
+}
+/* 保持桌面端原样 */
+
+@media (max-width: 600px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 48px;              /* 更窄，只占很小空间 */
+    max-width: 64px;
+    min-width: 44px;
+    height: 100vh;
+    z-index: 1200;
+    background: var(--card-bg-color);
+    border-right: 1px solid var(--border-color);
+    box-shadow: 2px 0 12px rgba(0,0,0,0.08);
+    padding: 0.5rem 0.2rem 0.5rem 0.2rem;
+    overflow-y: auto;
+    flex: none;
+    align-items: center;
+  }
+  .category-list {
+    gap: 0.1rem;
+    align-items: center;
+    padding: 0;
+  }
+  .category-btn {
+    width: 48px;
+    min-width: 40px;
+    max-width: 48px;
+    padding: 0.2rem 0;
+    margin: 0;
+    font-size: 0.75rem;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-radius: 6px;
+  }
+  .product-panel {
+    padding: 0 !important;
+    margin-left: 48px; /* 与.sidebar宽度一致，避免被遮挡 */
+    width: calc(100vw - 48px);
+    min-width: 0;
+    max-width: 100vw;
+    box-sizing: border-box;
+  }
+  .cart-panel {
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .product-panel {
+    flex: 1 1 0%;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin-right: 0 !important;
+    padding-right: 0 !important;
+  }
 }
 </style>
