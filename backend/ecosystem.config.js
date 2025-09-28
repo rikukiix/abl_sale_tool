@@ -18,10 +18,7 @@ module.exports = {
       // 工作目录
       cwd: backendDir,
       
-      // 【【【 最终修复 】】】
       interpreter: path.join(backendDir, 'venv', 'bin', 'python'),
-      // 明确指定使用 Fork 模式，而不是默认的 Cluster 模式
-      //exec_mode: 'fork',
 
       instances: 1,
       autorestart: true,

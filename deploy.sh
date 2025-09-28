@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ==============================================================================
-#                 一键部署脚本 for abl-booth-tool (修正版)
+#                 一键部署脚本 for abl-booth-tool 
 #
 # 该脚本会自动完成以下任务:
 # 1. 安装系统依赖 (Nginx, Python, Git, Curl)
@@ -18,7 +18,7 @@ PROJECT_NAME="abl-booth-tool"
 DOMAIN_NAME="booth-tool.secret-sealing.club"
 WWW_DOMAIN_NAME="www.booth-tool.secret-sealing.club"
 # 请务必替换成您自己的有效邮箱
-EMAIL="2300011496@stu.pku.edu.cn"
+EMAIL="your_email@xx.xx"
 
 # --- 自动检测路径 (请勿修改) ---
 # 获取脚本所在的绝对路径，作为项目根目录
@@ -79,10 +79,11 @@ fi
 echo "--> Node.js 和 PM2 环境已准备就绪。"
 
 # 3. 前端构建 (可选)
-# echo "--> 正在构建前端项目..."
-# cd "${PROJECT_BASE_DIR}/frontend"
-# npm install
-# npm run build
+echo "--> 正在构建前端项目..."
+cd "${PROJECT_BASE_DIR}/frontend"
+npm install
+npm run build
+echo "--> 前端构建完成，产物位于 ${FRONTEND_DIR} 。"
 
 # 4. 后端环境设置
 echo "--> 正在设置 Python 后端环境..."
@@ -189,4 +190,8 @@ echo "您的网站现在应该可以通过以下地址访问："
 echo "https://${DOMAIN_NAME}"
 echo ""
 echo "您可以使用 'pm2 status' 命令查看后端服务状态。"
+echo "======================================================="
+echo "注意,请你在部署后尽快修改backend/.env文件中的管理员密码和摊主密码！"
+echo "默认管理员密码: 1919810"
+echo "默认摊主密码: 114514"
 echo "========================================================"

@@ -1,7 +1,34 @@
 # 东方project展会出摊辅助工具
 
 一个为东方Project同人展摊主打造的、极简高效的销售与库存管理解决方案。
+
+**注意**:现在这个出摊工具的使用教程已经被迁移到了我们社团的**出摊指南.pdf**文档内,请在它的项目内查看之。
+
+**项目链接**:[Github](https://github.com/Renko6626/tho-booth-manual)
+
+**社团页面**:[境界景观学会])(https://www.abl.secret-sealing.club/events/booth-manual)
+
+## 目录
+
+- [更新日志](#-更新日志
+- [项目简介](#-项目简介)
+- [系统架构与页面](#️-系统架构与页面)
+- [快速部署](#-快速部署)
+- [环境配置](#-环境配置)
+- [如何贡献](#-如何贡献)
+- [开源协议](#-开源协议)
+- [未来规划](#-未来规划)
+- [联系方式](#-联系方式)
+
 ## 更新日志
+### 2025-09-27＆28更新:
+- 加入了一键部署代码,现在部署这个项目会非常简单!
+- 加入了制品分类,现在顾客和管理员都可以根据分类快速过滤商品
+- 修复顾客页面制品卡片重叠或者图片比例不对的问题
+- 给顾客页面做了手机端适配,加入了可调节的制品卡片大小选项
+- 优化部分样式设计和手机端的适配细节
+
+
 ### 2025-09-08更新： 
 - 加入了统计页面，现在它可以自动生成销售报告并导出到excel表格
 - 修复了处理中订单堆积产生的负数库存效果的问题(增加了下单之前对这件事的判断)
@@ -32,11 +59,6 @@
 - 💾 数据文件导出：支持将销售记录导出为可以直接打印的Excel表格，方便线下备份与对账。
 
 - 🌙 自定义制品与展会：允许社团管理员自定义自己的展会和制品信息，给摊主设置权限与密码。
-
-
-![游客页面](./images/游客页面.png)
-![摊主页面](./images/摊主页面.png)
-![管理员页面](./images/管理员页面.png)
 
 
 **线下使用**：
@@ -79,73 +101,79 @@
 
 ## 🚀 快速部署
 
-### 环境要求
--   **服务器**: 一台拥有公网IP的云服务器（如阿里云、腾讯云）。
--   **运行环境**: `Python 3.8+`, `Node.js 14+`, `nginx`。
--   **域名** : 已备案的域名，用于访问系统。
+## 🚀 一键自动化部署
 
-### 部署步骤 (概要)
-由于您有自己的服务器，以下是部署流程概要，具体命令可根据您的环境调整。
+本项目推荐使用根目录下的 `deploy.sh` 脚本进行一键自动化部署，涵盖后端、前端、Nginx、SSL 证书等所有配置。
 
-1.  **获取代码**
-    ```bash
-    git clone https://github.com/Renko6626/abl_sale_tool.git
-    cd abl_sale_tool
-    ```
+### 1. 环境要求
+- Ubuntu 20.04+（建议）
+- 具备 sudo 权限
+- 域名已解析到服务器
 
-2.  **后端部署 (Flask)**
-    ```bash
-    # 创建虚拟环境并安装依赖
-    python3 -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
+### 2. 配置 deploy.sh
+首先编辑 `deploy.sh` 顶部的用户配置区：
 
-    # 配置环境变量（设置密钥、数据库路径、管理员密码等）
-    cp .env.example .env
-    vim .env
+```bash
+PROJECT_NAME="abl-booth-tool" #项目名称
+DOMAIN_NAME="booth-tool.secret-sealing.club" #替换为你自己的域名,记得在你的服务器配置DNS解析记录
+WWW_DOMAIN_NAME="www.booth-tool.secret-sealing.club" 
+EMAIL="your@email.com"  # 替换为你的邮箱,这用于给certbot配置https服务
+```
 
-    # 使用 Gunicorn 启动应用
-    gunicorn -w 4 -b 127.0.0.1:5000 app:app
-    ```
+### 3. 运行一键部署脚本
+```bash
+chmod +x deploy.sh
+sudo ./deploy.sh
+```
+脚本会自动完成：
+- 安装 Nginx、Python3、Git、Curl
+- 安装/配置 NVM、Node.js、PM2
+- 创建 Python 虚拟环境并安装依赖
+- 安装 gunicorn
+- 自动创建日志和 socket 目录
+- 使用 PM2 启动/守护后端服务
+- 自动生成并启用 Nginx 配置（含前端静态、API 代理、静态资源）
+- 自动申请并配置 SSL 证书（HTTPS）
 
-3.  **前端部署 (Vue 3)**
-    ```bash
-    # 安装依赖并构建生产环境静态文件
-    npm install
-    npm run build
-    # 将构建好的 dist 目录内容部署到 nginx 服务的根目录下
-    ```
+### 4. 检查服务状态
+```bash
+pm2 status
+sudo systemctl status nginx
+```
 
-4.  **配置 Nginx**
-    编辑 nginx 配置文件，将 API 请求代理到后端的 Gunicorn 服务。
-    ```nginx
-    server {
-        listen 80;
-        server_name your-domain.com; # 你的域名或IP
+### 5. 访问网站
+部署完成后，访问：
+- https://booth-tool.secret-sealing.club
+- (或者是你自己在`deploy.sh`里面定义的网站域名)
+如需自定义前端、后端配置，请参考脚本注释和各自目录下的 README。
 
-        # 静态文件（前端）
-        location / {
-            root /path/to/your/vue/dist;
-            index index.html;
-            try_files $uri $uri/ /index.html;
-        }
+---
+如遇问题：
+- 查看 PM2 日志：`pm2 logs abl-booth-tool`
+- 查看 Nginx 日志：`sudo tail -n 100 /var/log/nginx/error.log`
+- 检查虚拟环境 gunicorn 路径：`backend/venv/bin/gunicorn`
 
-        # 动态 API（后端）
-        location /sale/api/ {
-            proxy_pass http://127.0.0.1:5000/;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-        }
+---
 
-        # 静态资源代理
-        location /sale/static/ {
-            proxy_pass http://127.0.0.1:5000/static/;
-        }
-    }
-    ```
-    重启 nginx 服务即可。
+**注意**: 使用一键部署脚本部署的项目的密码是默认的，请务必在 `backend/.env` 文件中修改 `ADMIN_PASSWORD` 和 `VENDOR_PASSWORD` 以确保安全。
 
-    **重要提示**：本项目的API路径使用 `/sale/api` 前缀，请确保Nginx配置中的路径与前端代码中的路径一致。如果需要在生产环境使用不同的API路径，请参考 `frontend/ENV_CONFIG.md` 文件进行配置。
+- 默认摊主密码: `114514`
+- 默认管理员密码: `1919810`
+
+更多高级用法和手动部署细节请参考脚本和源码注释。
+## ⚙️ 环境配置
+
+
+### 后端环境
+
+出摊系统的flask后端的环境变量保存在 `backend/.env` 文件中，主要包括：
+- `ADMIN_PASSWORD`：管理员密码，用于访问管理员页面，建议设置复杂密码。
+- `VENDOR_NAME`：摊主默认的密码,在未设置摊主密码的情况下可以使用它登录摊主页面。
+- `MAX_CONTENT_LENGTH`：上传文件的最大大小，默认16MB。
+请根据需要修改这些配置。
+
+### 前端环境
+- 暂无
 
 ## 🤝 如何贡献
 
@@ -165,10 +193,22 @@
 
 ## 🔮 未来规划
 
--   [ ] **移动端App开发**：开发原生App版本，提供更好的离线体验和推送通知。
+-   [ ] **移动端App开发**：开发原生App版本，提供更好的离线体验和推送通知，让没有web服务器的社团也能使用之。
+-   [ ] **接入库存和财务系统**：提高集成度，让销售结果无缝对接到社团内部系统
+-   [ ] **离线模式**：增强离线缓存和断网恢复能力，应对网络太烂的场合。
+-   [ ] **更丰富的数据分析**：增加销售趋势、热销商品等可视化报表，帮助社团分析商品销售情况以改进策略。
+-   [ ] **一键导入**: 从excel或其它格式文件一键批量导入多种制品。
+-   [ ] **更简单部署**: 提供Docker镜像和更完善的一键部署脚本，降低部署门槛。
+
+## 📞 联系方式
+
+如果您有任何问题、建议或需要帮助，请通过以下方式联系我们：
+- 在这个Github项目下提出issue
+- 社团邮箱: `contact@secret-sealing.club`
+- 主催个人qq: `1471850534`
+- 社团qq群组: `748966747`
 
 ---
 
 **祝您出摊顺利，场场完售！**
-
 
