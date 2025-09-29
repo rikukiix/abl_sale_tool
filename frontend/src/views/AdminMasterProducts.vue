@@ -23,6 +23,10 @@
               <label for="create-price">默认价格 (¥):</label>
               <input id="create-price" v-model.number="createFormData.default_price" type="number" step="0.01" placeholder="45.00" required />
             </div>
+            <div class="form-group">
+              <label for="create-category">商品分类:</label>
+            <input id="create-category" v-model="createFormData.category" type="text" placeholder="漫画、亚克力、毛绒玩具等" />
+            </div>
           </div>
           
           <!-- 【核心修改】使用可复用的 ImageUploader 组件 -->
@@ -65,6 +69,10 @@
           <div class="form-group">
             <label>默认价格 (¥):</label>
             <input v-model.number="editableProduct.default_price" type="number" step="0.01" required />
+          </div>
+          <div class="form-group">
+            <label>商品分类:</label>
+            <input v-model="editableProduct.category" type="text" placeholder="漫画、亚克力、毛绒玩具等" />
           </div>
 
           <!-- 【核心修改】再次使用 ImageUploader 组件 -->
@@ -116,6 +124,7 @@ async function handleCreate() {
     formData.append('product_code', createFormData.value.product_code);
     formData.append('name', createFormData.value.name);
     formData.append('default_price', createFormData.value.default_price);
+    formData.append('category', createFormData.value.category);
     if (createFormFile.value) {
       formData.append('image', createFormFile.value);
     }
@@ -168,7 +177,7 @@ async function handleUpdate() {
     formData.append('product_code', editableProduct.value.product_code);
     formData.append('name', editableProduct.value.name);
     formData.append('default_price', editableProduct.value.default_price);
-
+    formData.append('category', editableProduct.value.category);
     if (editFormFile.value) {
       formData.append('image', editFormFile.value);
     } else if (isImageRemovedForEdit.value) {

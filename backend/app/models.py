@@ -37,6 +37,8 @@ class MasterProduct(db.Model):
     is_active = db.Column(db.Boolean, default=True, nullable=False, index=True)
     # 反向关系，可以找到所有使用此模板的展会商品
     products = db.relationship('Product', backref='master_product', lazy=True, cascade="all, delete-orphan")
+
+    category = db.Column(db.String(64), nullable=True, index=True)  # 新增分类字段
     
     def to_dict(self):
         return {
@@ -45,7 +47,8 @@ class MasterProduct(db.Model):
             'name': self.name,
             'default_price': self.default_price,
             'image_url': self.image_url,
-            'is_active': self.is_active
+            'is_active': self.is_active,
+            'category': self.category
         }
 
 # 【重大修改】Product (展会商品) 模型
@@ -92,7 +95,8 @@ class Product(db.Model):
             'initial_stock': self.initial_stock,
             'current_stock': self.current_stock, # 【新增】在 API 响应中加入当前库存
             'image_url': self.master_product.image_url,
-            'event_id': self.event_id
+            'event_id': self.event_id,
+            'category': self.master_product.category
         }
 
 # Order (订单) 模型
